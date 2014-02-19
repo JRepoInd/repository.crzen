@@ -1,0 +1,7 @@
+[B]Version 0.0.2[/B]
+- Thanks goes out to TheHighway for doing proof reading and debugging for Crzen.
+- Slight testing and repair work.
+- Proof read.  Ready for testing.
+
+[B]Version 0.0.1[/B]
+- initial build.
