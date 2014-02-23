@@ -1,3 +1,7 @@
+[B]Version 0.0.3[B]
+- Fixed the shutil.copy2 exception issue with andriod.
+- Some code cleanup also. 
+
 [B]Version 0.0.2[/B]
 - Thanks goes out to TheHighway for doing proof reading and debugging for Crzen.
 - Slight testing and repair work.
