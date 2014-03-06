@@ -595,7 +595,7 @@ class MainWindow(xbmcgui.WindowXML):
                 elif result == -3: #server error
                     dialog = xbmcgui.Dialog()
                     if URL == '' : URL = 'Unknown URL'
-                    dialog.ok("Error", "Cannot connect to server and no cached file exists.")
+                    dialog.ok("Error", "Can not connect to server and no cached file exists.")
                 
                 if result != 0: #failure
                     self.loading.setVisible(0)

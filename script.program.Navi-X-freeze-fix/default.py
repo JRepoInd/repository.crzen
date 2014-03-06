@@ -1,71 +1,15 @@
 import os
 import shutil
+import fileinput
 import xbmc, xbmcgui
 	
 Addon_NAME='Navi-X freeze fix'
-ACTION_PREVIOUS_MENU = 10
-ACTION_NAV_BACK = 92
 
-directory_NaviX = (xbmc.translatePath('special://home/addons/Navi-X'))
-#freezelog = xbmc.validatePath('//storage/sdcard0/Download/Navi-x-freeze.log')
-#open(freezelog, 'w+').close()
-
-def devicelog(path,text='',var=''):
-	#create an accessable log for debugging android
-	with open(path, 'a+') as log:
-		log.write(text)
-		log.write(var)
-	log.close()
-	
-def LoG(t=''): print Addon_NAME+": "+t
-#def notification(header="", message="", sleep=5000 ): xbmc.executebuiltin( "XBMC.Notification(%s,%s,%i)" % ( header, message, sleep ) )
-
-def message(title, message):
-	dialog = xbmcgui.Dialog()
-	dialog.ok(title, message)	
-
-class Display(xbmcgui.Window):
-	#display a two input dialog box for install and uninstall
-	def __init__(self):
-		self.background = (xbmc.translatePath('special://home/addons/script.program.Navi-X-freeze-fix/fanart.jpg'))
-		self.addControl(xbmcgui.ControlImage(0,0,1280,720, self.background, aspectRatio=1))
-		self.strActionInfo = xbmcgui.ControlLabel(520, 300, 300, 300, '', 'font30', '0xFFFF00FF')
-		self.addControl(self.strActionInfo)
-		self.strActionInfo.setLabel(Addon_NAME)
-		self.button0 = xbmcgui.ControlButton(450, 380, 80, 30, "  Fix")
-		self.addControl(self.button0)
-		self.button1 = xbmcgui.ControlButton(590, 380, 80, 30, " Undo")
-		self.addControl(self.button1)
-		self.button2 = xbmcgui.ControlButton(750, 380, 80, 30, "  Exit")
-		self.addControl(self.button2)
-		self.setFocus(self.button0)
-		self.button0.controlRight(self.button1)
-		self.button0.controlLeft(self.button2)
-		self.button1.controlRight(self.button2)
-		self.button1.controlLeft(self.button0)
-		self.button2.controlRight(self.button0)
-		self.button2.controlLeft(self.button1)
-		
-	def onAction(self, action):
-		if action == ACTION_PREVIOUS_MENU:
-			self.close()
-		if action == ACTION_NAV_BACK:
-			self.close()
-
-	def onControl(self, control):
-		if control == self.button0:
-			Main().Main_install()
-			
-		if control == self.button1:
-			Main().Main_uninstall()
-			
-		if control == self.button2:
-			self.close()
-
-class Main():
-	#set main vars
+class Main:
+	#set main variables
 	#andriod_path = ('//storage/sdcard0/Android/data/org.xbmc.xbmc/files/.xbmc/addons')
 	#droid = xbmc.validatePath('//storage/sdcard0/Download/navix.py')
+	directory_NaviX = (xbmc.translatePath('special://home/addons/Navi-X'))
 	directory_navi_src = (xbmc.translatePath('special://home/addons/Navi-X/src' ))
 	fix_dir = (xbmc.translatePath('special://home/addons/script.program.Navi-X-freeze-fix/src' ))
 	addon_xml = os.path.join((xbmc.translatePath('special://home/addons/Navi-X')), 'addon.xml')
@@ -76,116 +20,231 @@ class Main():
 	fileloader = os.path.join(directory_navi_src,'CFileLoader.py')
 	fileloader_old = os.path.join(directory_navi_src,'CFileLoader.old')
 	status = 'failed'
+	version = 'invalid'
 
-	def Main_install(self):
-		LoG("hello. install.")
-		#if (os.path.exists(self.navix) != True) or (os.path.exists(self.fileloader) != True):
-		if (not os.path.exists(self.navix)==True) or (not os.path.exists(self.fileloader)==True):
+class Background(xbmcgui.Window):
+    def __init__(self	):
+    	self.background = (xbmc.translatePath('special://home/addons/script.program.Navi-X-freeze-fix/fanart.jpg'))
+    	self.addControl(xbmcgui.ControlImage(0,0,1280,720, self.background, aspectRatio=1)) 
+    		
+class Display(xbmcgui.Window):
+	#background and four input dialog buttons
+	ACTION_PREVIOUS_MENU = 10
+	ACTION_NAV_BACK = 92 
+	def __init__(self):
+		self.background = (xbmc.translatePath('special://home/addons/script.program.Navi-X-freeze-fix/fanart.jpg'))
+		self.addControl(xbmcgui.ControlImage(0,0,1280,720, self.background, aspectRatio=1))
+		self.strActionInfo = xbmcgui.ControlLabel(520, 300, 300, 300, '', 'font30', '0xFFFF00FF')
+		self.addControl(self.strActionInfo)
+		self.strActionInfo.setLabel(Addon_NAME)
+		self.button0 = xbmcgui.ControlButton(385, 380, 135, 30, "  Freeze Fix")
+		self.addControl(self.button0)
+		self.button1 = xbmcgui.ControlButton(575, 380, 135, 30, "Freeze Undo")
+		self.addControl(self.button1)
+		self.button2 = xbmcgui.ControlButton(785, 380, 135, 30, "      Exit")
+		self.addControl(self.button2)
+		self.button3 = xbmcgui.ControlButton(575, 430, 135, 30, " Gotham Fix")
+		self.addControl(self.button3)
+		
+		self.setFocus(self.button2)	
+			
+		self.button0.controlRight(self.button1)
+		self.button0.controlLeft(self.button3)
+		self.button0.controlUp(self.button3)
+		self.button0.controlDown(self.button3)
+		
+		self.button1.controlRight(self.button2)
+		self.button1.controlLeft(self.button0)
+		self.button1.controlUp(self.button3)
+		self.button1.controlDown(self.button3)
+		
+		self.button2.controlRight(self.button3)
+		self.button2.controlLeft(self.button1)
+		self.button2.controlUp(self.button3)
+		self.button2.controlDown(self.button3)
+		
+		self.button3.controlRight(self.button0)
+		self.button3.controlLeft(self.button2)
+		self.button3.controlUp(self.button0)
+		self.button3.controlDown(self.button0)
+		
+		
+	def onAction(self, action):
+		#non Display Button control
+		if action == self.ACTION_PREVIOUS_MENU:
+			self.close()
+		if action == self.ACTION_NAV_BACK:
+			self.close()
+
+	def onControl(self, control):
+		#Display Button control
+		if control == self.button0:
+			freeze_install(Main)
+			
+		if control == self.button1:
+			freeze_uninstall(Main)
+		
+		if control == self.button3:
+			xml_mod(Main)
+			
+		if control == self.button2:
+			self.close()
+			
+		
+def freeze_install(Main):    
+	#install freeze fix
+	LoG("hello. install.")
+	if Main.version == ('valid'):
+		if (not os.path.exists(Main.navix)) or (not os.path.exists(Main.fileloader)):
 			message("Error", "You do not appear to have Navi-X installed.")
 			#notification("Error", "You do not appear to have Navi-X installed.")
 			LoG("Error. You do not appear to have Navi-X installed.")
 		else:
 			###### navix
-			if os.path.exists(self.navix) == True:
-				if os.path.exists(self.navix_old) == True:
-					os.remove(self.navix)
-					#devicelog(freezelog,"line 92  removed navix.\n")
+			if os.path.exists(Main.navix):
+				if os.path.exists(Main.navix_old):
+					os.remove(Main.navix)
+					#devicelog(freezelog," removed navix.\n")
 				else:
-					os.rename(self.navix, self.navix_old)
-					#devicelog(freezelog,"line 95 renamed to navixold.\n") 
+					os.rename(Main.navix, Main.navix_old)
+					#devicelog(freezelog," renamed to navixold.\n") 
 			try:
-				#devicelog(freezelog,"line 97 do shutil.copy2.\n")
-				shutil.copy2(self.fix_navix, self.navix) 
-				#shutil.copy(os.path.join(self.fix_dir,'navix.py'), self.directory_navi_src)
-				self.status = 'success'			
+				#devicelog(freezelog," do shutil.copy2.\n")
+				shutil.copy2(Main.fix_navix, Main.navix) 
+				Main.status = 'success'			
 			except :
-				if os.path.exists(self.navix) == True:
-					self.status = 'success'
-					#devicelog(freezelog,"line 104 copied navix.\n")
+				if os.path.exists(Main.navix):  # need this for android. it will copy but fault
+					Main.status = 'success'
+					#devicelog(freezelog," copied navix.\n")
 					#message("Notice", "the fix has moved the files")
-					'''try:
-						shutil.copy2(self.navix, self.droid)					
-					except :
+					'''try:    # for checking files for android
+						shutil.copy2(Main.navix, Main.droid)					
+					except :    # need this for android. it will copy but fault
 						pass'''									
 				else:
 					LoG("Error. Could not do shutil.copy for navix.")
-					#devicelog(freezelog,"line 112 Could not do navx shutil.copy.\n")			
+					#devicelog(freezelog," Could not do navx shutil.copy.\n")			
 										
 			######  CFileLoader
-			if os.path.exists(self.fileloader) == True:
-				if os.path.exists(self.fileloader_old) == True:
-					os.remove(self.fileloader)
+			if os.path.exists(Main.fileloader):
+				if os.path.exists(Main.fileloader_old):
+					os.remove(Main.fileloader)
 				else:
-					os.rename(self.fileloader, self.fileloader_old)
-					#devicelog(freezelog,"line 120   renamed to cfileloaderold\n")
+					os.rename(Main.fileloader, Main.fileloader_old)
+					#devicelog(freezelog," renamed to Cfileloaderold\n")
 			try:
-				#devicelog(freezelog,"line 122  do shutil.copy2.\n")
-				shutil.copy2(self.fix_fileloader, self.fileloader)
-				#shutil.copy2(os.path.join(self.fix_dir,'CFileLoader.py'), self.directory_navi_src)
-				self.status = 'success'	
+				#devicelog(freezelog," do shutil.copy2.\n")
+				shutil.copy2(Main.fix_fileloader, Main.fileloader)
+				Main.status = 'success'	
 			except:
-				if os.path.exists(self.fileloader) == True:
-					self.status = 'success'
+				if os.path.exists(Main.fileloader):   # need this for android. it will copy but fault
+					Main.status = 'success'
 					LoG("copied. fileloader.")
-					#devicelog(freezelog,"line 130  copied. Cfileloader.\n")
+					#devicelog(freezelog,"  copied. Cfileloader.\n")
 					#message("Notice", "the fix has moved the files")
-					'''try:
-						shutil.copy2(self.fileloader, self.droid)					
-					except :
+					'''try:    # for checking files for android
+						shutil.copy2(Main.fileloader, Main.droid)					
+					except :    # need this for android. it will copy but fault
 						pass'''										
 				else:
 					LoG("Error. Could not do shutil.copy for fileloader.")
-					#devicelog(freezelog,"line 138 Could not do fileloader shutil.copy.\n")
-					
-				
-			if self.status == 'success':
+					#devicelog(freezelog," Could not do fileloader shutil.copy.\n")			
+			if Main.status == 'success':
 				message("Success", "The fix has been installed.")
 				#notification("Success", "The fix has been installed.")
 				LoG("fix. installed.")
-			else :
+			else:
 				message("Error", "The fix installarion has failed.")
+	elif Main.version == ('invalid'):
+		message("Notice", "You need Navi-X version 3.7.8 to run this fix.")
 								
-	def Main_uninstall(self):
-		LoG("hello. uninstall.")
-		if (not os.path.exists(self.navix)==True) or (not os.path.exists(self.fileloader)==True):
+def freeze_uninstall(Main):    
+	#uninstall freeze fix
+	LoG("hello. uninstall.")
+	if Main.version == ('valid'):
+		if (not os.path.exists(Main.navix)) or (not os.path.exists(Main.fileloader)):
 			message("Error", "You do not appear to have Navi-X installed.")
 			LoG("error. You do not appear to have Navi-X installed.") 
-		elif (os.path.exists(self.navix_old) != True) or (os.path.exists(self.fileloader_old) != True):
+		elif (not os.path.exists(Main.navix_old)) or (not os.path.exists(Main.fileloader_old)):
 			message("Error", "You do not appear to have original files to restore from. \nOr have not run this fix before")
 			#notification("Error", "You do not appear to have Navi-X freeze fix installed."); 
 		else:
-			if os.path.exists(self.navix) == True:
-				os.remove(self.navix)
-				os.rename(self.navix_old, self.navix)
+			if os.path.exists(Main.navix):
+				os.remove(Main.navix)
+				os.rename(Main.navix_old, Main.navix)
 		
-			if os.path.exists(self.fileloader) == True:
-				os.remove(self.fileloader)
-				os.rename(self.fileloader_old,self.fileloader)
+			if os.path.exists(Main.fileloader):
+				os.remove(Main.fileloader)
+				os.rename(Main.fileloader_old,Main.fileloader)
 					
 			message("Success", "The fix has been removed.")
 			#notification("Success", "The fix has been removed.") 
 			LoG("fix. removed.")
-			#devicelog(freezelog,"line 168 The fix has been removed.\n")
+			#devicelog(freezelog," The fix has been removed.\n")
+	elif Main.version == ('invalid') :
+		message("Notice", "You need Navi-X version 3.7.8 to run this fix.")
 
-#check for Navi-X version 3.7.8 in line 4 of addon.xml
-if os.path.exists(directory_NaviX) ==True:
-	version=''
-	with open(Main().addon_xml, 'r') as xml:
+def xml_mod(Main):    
+	#modify addon.xml for use with Gotham
+	success = 0
+	with open(Main.addon_xml, 'r+') as xml:
+		for line in fileinput.input((Main.addon_xml), inplace=1):
+			if ('"xbmc.python" version="1.0"') in line:
+				line = line.replace('1.0' , '2.1.0')
+				success = 1
+			elif ('"xbmc.python" version="2.1.0"') in line:
+				success = 2				
+			print(line),			
+	if success == 1:				
+		message("Success","Navi-X is now all setup to run on Gotham")								
+	elif success == 2:
+			message("Notice","Navi-X was already setup to run on Gotham")								
+	elif success == 0:
+			message("Error","Could not find Python version number")
+	xml.close()	
+		
+def version_chk(Main):    
+	#check for Navi-X version 3.7.8 in line 4 of addon.xml
+	with open(Main.addon_xml, 'r') as xml:
 		for line in xml:
 			if ('"3.7.8"') in line:
 				print (Addon_NAME+ ": Navi-X " +line)
-				LoG("version. valid.")
-				version = 'valid'
+				LoG("Main.version. valid.")
+				Main.version = ('valid')
 				break
-	xml.close()
-	if version == 'valid':					
-		fix_display = Display()
-		fix_display.doModal()
-		del fix_display					
-	else:  
-		message("Notice", "You need Navi-X version 3.7.8 to run this fix.")
-else: 
-	message("Notice", "Cant find the Navi-X folder. \nPlease install the official Navi-X addon.")
+	xml.close()	
+	
+def message(title, message):
+	#### Output display box
+	dialog = xbmcgui.Dialog()
+	dialog.ok(title, message)	
+			
+###### Error reporting
+#create an accessable log for debugging android
+#freezelog = xbmc.validatePath('//storage/sdcard0/Download/Navi-x-freeze.log')
+#open(freezelog, 'w+').close()
+def devicelog(path,text='',var=''):    
+	with open(path, 'a+') as log:
+		log.write(text)
+		log.write(var)
+	log.close()
+#XBMC log	
+def LoG(t=''): print Addon_NAME+": "+t
+#on screen
+def notification(header="", message="", sleep=5000 ): xbmc.executebuiltin( "XBMC.Notification(%s,%s,%i)" % ( header, message, sleep ) )
 
-				
+		
+#### Start of program
+if os.path.exists(Main.directory_NaviX):	
+	version_chk(Main)		
+	fix_display = Display()
+	fix_display.doModal()
+	del fix_display							
+else:
+	display = Background()
+	display.show()
+	message(Addon_NAME, "Can not find the Navi-X folder. \nPlease install the official Navi-X addon.")
+	display.close()
+	del display		
+    	
 #EOF			

@@ -1,5 +1,9 @@
+[B]Version 0.0.4[B]
+ - Added Gotham addon.xml change to 2.1.0
+ - Rewrote the code a little to accommodate additions better.
+ 
 [B]Version 0.0.3[B]
-- Fixed the shutil.copy2 exception issue with andriod.
+- Fixed the shutil.copy2 exception issue with android.
 - Some code cleanup also. 
 
 [B]Version 0.0.2[/B]
