@@ -82,12 +82,12 @@ class MainWindow(xbmcgui.WindowXML):
             self.playlist = CPlayList()
             #Create favorite object contains the parsed favorite data. The self.favorites control displays
             #the content of this list
-#            self.favoritelist = CPlayList()
+			#            self.favoritelist = CPlayList()
             #fill the playlist with favorite data
-#            result = self.favoritelist.load_plx(favorite_file)
-#            if result != 0:
-#                shutil.copyfile(initDir+favorite_file, RootDir+favorite_file)
-#                self.favoritelist.load_plx(favorite_file)
+			#            result = self.favoritelist.load_plx(favorite_file)
+			#            if result != 0:
+			#                shutil.copyfile(initDir+favorite_file, RootDir+favorite_file)
+			#                self.favoritelist.load_plx(favorite_file)
 
             self.downloadslist = CPlayList()
             #fill the playlist with downloads data
@@ -188,7 +188,7 @@ class MainWindow(xbmcgui.WindowXML):
                        
             load_skin(self)
             
-            if nxserver.is_user_logged_in() == True:
+            if nxserver.is_user_logged_in() == True: #please wait
                 if platform == 'xbox':
                     pos = 4
                 else:
@@ -221,11 +221,14 @@ class MainWindow(xbmcgui.WindowXML):
                 #there is no startup playlist, load the Navi-X home page
                 result = self.ParsePlaylist(URL=self.home, proxy="CACHING")
                 if result != 0: #failed
-                    result = self.ParsePlaylist(URL=home_URL_mirror, proxy="CACHING") #mirror site                               
-            if result != 0:
-                #failed to load page startup page from both main and backup server
-                dialog = xbmcgui.Dialog()
-                dialog.ok("Error", "Please check your internet connection!")
+                    result = self.ParsePlaylist(URL=home_URL_mirror, proxy="CACHING") #mirror site
+                    if result != 0:
+                    	result = self.ParsePlaylist(URL=self.home, proxy="SMARTCACHING")	
+                    	proxy="CACHING"
+                    if result !=0:                             
+                    	#failed to load page startup page from both main and backup server
+                    	dialog = xbmcgui.Dialog()
+                    	dialog.ok("Error", "Please check your internet connection!")               
                 return 
                 
             #check the download queue    
@@ -256,7 +259,7 @@ class MainWindow(xbmcgui.WindowXML):
         def onAction1(self, action):
             self.state_action = 1                                        
                  
-            #always allow Exit even if busy
+            #always allow Exit even if busy please wait
             if (action == ACTION_SELECT_ITEM) and (self.getFocus() == self.list3):
                 pos = self.list3.getSelectedPosition()
                 if (platform == 'xbox') and (pos == 5) or (pos == 6):
@@ -472,7 +475,7 @@ class MainWindow(xbmcgui.WindowXML):
         ######################################################################        
         def DisplayMediaSource(self):
             pos = self.getPlaylistPosition()
-
+			#please wait
             if pos >= 0:
                 #Display media source
                 str_url=self.pl_focus.list[pos].URL;
@@ -579,13 +582,15 @@ class MainWindow(xbmcgui.WindowXML):
 					if (proxy == "CACHING") and (self.smartcache == 'true'):
 						for n in range(2):
 							try:
-								result = playlist.load_plx(URL, mediaitem, proxy="SMARTCACHE")								
-							except:			
+								result = playlist.load_plx(URL, mediaitem, proxy="SMARTCACHE")						
+							except:		
 								result = -3
+						if URL == ('http://navi-x.googlecode.com/svn/trunk/Playlists/home2.plx'):
+							result = 1
 								
 					else:
 						result = playlist.load_plx(URL, mediaitem, proxy)
-                
+
                 if result == -1: #error
                     dialog = xbmcgui.Dialog()
                     dialog.ok("Error", "This playlist requires a newer Navi-X version")
@@ -595,11 +600,7 @@ class MainWindow(xbmcgui.WindowXML):
                 elif result == -3: #server error
                     dialog = xbmcgui.Dialog()
                     if URL == '' : URL = 'Unknown URL'
-<<<<<<< HEAD
-                    dialog.ok("Error", "Can not connect to server and no cached file exists.")
-=======
-                    dialog.ok("Error", "Cannot connect to server and no cached file exists.")
->>>>>>> e818b04cbea218cea7c242b47f8e452122d3b053
+                    dialog.ok("Error", "Can not connect to server and no cached file exists.",URL)
                 
                 if result != 0: #failure
                     self.loading.setVisible(0)
@@ -614,8 +615,8 @@ class MainWindow(xbmcgui.WindowXML):
                 listentry.setLabel("View: " + self.listview)                
             
             #succesful
-#the next line is for used for debugging only            
-#            playlist.save(RootDir + 'source.plx')
+			#the next line is for used for debugging only            
+			#playlist.save(RootDir + 'source.plx')
             
             #loading finished, display the list
             self.loading.setLabel("Please wait......")

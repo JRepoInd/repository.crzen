@@ -13,12 +13,19 @@ class Main:
 	directory_navi_src = (xbmc.translatePath('special://home/addons/Navi-X/src' ))
 	fix_dir = (xbmc.translatePath('special://home/addons/script.program.Navi-X-freeze-fix/src' ))
 	addon_xml = os.path.join((xbmc.translatePath('special://home/addons/Navi-X')), 'addon.xml')
-	fix_navix = os.path.join(fix_dir,'navix.py')
-	fix_fileloader = os.path.join(fix_dir,'CFileLoader.py')
+	
+	fix_navix = os.path.join(fix_dir,'navix.py')	
 	navix = os.path.join(directory_navi_src,'navix.py')
 	navix_old = os.path.join(directory_navi_src,'navix.old')
+	
+	fix_fileloader = os.path.join(fix_dir,'CFileLoader.py')
 	fileloader = os.path.join(directory_navi_src,'CFileLoader.py')
 	fileloader_old = os.path.join(directory_navi_src,'CFileLoader.old')
+	
+	fix_playlist = os.path.join(fix_dir,'CPlayList.py')
+	playlist = os.path.join(directory_navi_src,'CPlayList.py')
+	playlist_old = os.path.join(directory_navi_src,'CPlayList.old')
+	
 	status = 'failed'
 	version = 'invalid'
 
@@ -95,7 +102,7 @@ def freeze_install(Main):
 	#install freeze fix
 	LoG("hello. install.")
 	if Main.version == ('valid'):
-		if (not os.path.exists(Main.navix)) or (not os.path.exists(Main.fileloader)):
+		if (not os.path.exists(Main.navix)) or (not os.path.exists(Main.fileloader)) or (not os.path.exists(Main.fileloader)):
 			message("Error", "You do not appear to have Navi-X installed.")
 			#notification("Error", "You do not appear to have Navi-X installed.")
 			LoG("Error. You do not appear to have Navi-X installed.")
@@ -148,13 +155,40 @@ def freeze_install(Main):
 						pass'''										
 				else:
 					LoG("Error. Could not do shutil.copy for fileloader.")
-					#devicelog(freezelog," Could not do fileloader shutil.copy.\n")			
+					#devicelog(freezelog," Could not do fileloader shutil.copy.\n")
+		
+			######  CPlayList
+			if os.path.exists(Main.playlist):
+				if os.path.exists(Main.playlist_old):
+					os.remove(Main.playlist)
+				else:
+					os.rename(Main.playlist, Main.playlist_old)
+					#devicelog(freezelog," renamed to CPlayList\n")
+			try:
+				#devicelog(freezelog," do shutil.copy2.\n")
+				shutil.copy2(Main.fix_playlist, Main.playlist)
+				Main.status = 'success'	
+			except:
+				if os.path.exists(Main.playlist):   # need this for android. it will copy but fault
+					Main.status = 'success'
+					LoG("copied. CPlayList.")
+					#devicelog(freezelog,"  copied. CPlayList.\n")
+					#message("Notice", "the fix has moved the files")
+					'''try:    # for checking files for android
+						shutil.copy2(Main.playlist, Main.droid)					
+					except :    # need this for android. it will copy but fault
+						pass'''										
+				else:
+					LoG("Error. Could not do shutil.copy2 for playlist.")
+					#devicelog(freezelog," Could not do playlist shutil.copy2.\n")
+								
 			if Main.status == 'success':
 				message("Success", "The fix has been installed.")
 				#notification("Success", "The fix has been installed.")
 				LoG("fix. installed.")
 			else:
 				message("Error", "The fix installarion has failed.")
+				
 	elif Main.version == ('invalid'):
 		message("Notice", "You need Navi-X version 3.7.8 to run this fix.")
 								
@@ -162,10 +196,10 @@ def freeze_uninstall(Main):
 	#uninstall freeze fix
 	LoG("hello. uninstall.")
 	if Main.version == ('valid'):
-		if (not os.path.exists(Main.navix)) or (not os.path.exists(Main.fileloader)):
+		if (not os.path.exists(Main.navix)) or (not os.path.exists(Main.fileloader)) or (not os.path.exists(Main.playlist)):
 			message("Error", "You do not appear to have Navi-X installed.")
 			LoG("error. You do not appear to have Navi-X installed.") 
-		elif (not os.path.exists(Main.navix_old)) or (not os.path.exists(Main.fileloader_old)):
+		elif (not os.path.exists(Main.navix_old)) or (not os.path.exists(Main.fileloader_old)) or (not os.path.exists(Main.playlist_old)):
 			message("Error", "You do not appear to have original files to restore from. \nOr have not run this fix before")
 			#notification("Error", "You do not appear to have Navi-X freeze fix installed."); 
 		else:
@@ -176,6 +210,10 @@ def freeze_uninstall(Main):
 			if os.path.exists(Main.fileloader):
 				os.remove(Main.fileloader)
 				os.rename(Main.fileloader_old,Main.fileloader)
+				
+			if os.path.exists(Main.playlist):
+				os.remove(Main.playlist)
+				os.rename(Main.playlist_old,Main.playlist)
 					
 			message("Success", "The fix has been removed.")
 			#notification("Success", "The fix has been removed.") 

@@ -176,11 +176,15 @@ class CFileLoader2:
                 os.rename(localfile, localfile + ".old")
                
         #load the file
-        if URL[:3] == 'ftp':
-            self.loadFTP(URL, localfile, timeout, proxy, content_type, retries)
-        else:
-            self.loadHTTP(URL, localfile, timeout, proxy, content_type, retries) 
-        
+        try:
+        	if URL[:3] == 'ftp':
+        		self.loadFTP(URL, localfile, timeout, proxy, content_type, retries)
+        	else:
+        		self.loadHTTP(URL, localfile, timeout, proxy, content_type, retries) 
+        except:    #  print to log 
+        	print('url  ',URL)
+        	print('proxy', proxy)
+        	
 		#this will creat a new cached file from the existing file and make it usable
         if os.path.exists(localfile + ".old") == True:        
             if os.path.exists(localfile) == False: 	  #see that the new file was not loaded from the server
@@ -191,6 +195,7 @@ class CFileLoader2:
 						for line in old_file : 
 							with open(localfile, 'a+') as new_file:       #open the new file with autoclose
 								new_file.write(line)                          #copies the line in old_file to new_file
+					#xbmc.executebuiltin( "XBMC.Notification(%s,%s,%i)" % ( 'Server Error', 'You are reading cached files', 5000 ) )
 					self.state = 0 #success
 				except :
 					self.state =  -1 #failed
@@ -214,12 +219,13 @@ class CFileLoader2:
     ######################################################################
     # Description: Downloads a file in case of URL and returns absolute
     #              path to the local file.
-#@todo: Fill parameters    
+	#@todo: Fill parameters    
     # Parameters : URL=source, localfile=destination
     # Return     : -
     ######################################################################           
-    def loadHTTP(self, URL, localfile='', timeout=0, proxy="CACHING", \
+    def loadHTTP(self, URL, localfile='', timeout=0, proxy="", \
                   content_type= '', retries=0):
+                
         if timeout != 0:
             socket_setdefaulttimeout(timeout)
         self.state = -1 #failure
@@ -229,6 +235,7 @@ class CFileLoader2:
             counter = counter + 1 
             try:
                 cookies = ''
+                print('nxserver_URL',nxserver_URL)
                 if URL.find(nxserver_URL) != -1:
                     cookies = 'platform=' + platform + '; version=' + Version +'.'+ SubVersion
                     cookies = cookies + '; nxid=' + nxserver.user_id
@@ -240,28 +247,31 @@ class CFileLoader2:
                 #print values
                                  
                 req = urllib2.Request(URL, None, values)
-
                 #req = urllib2.Request(URL)
-                f = urllib2.urlopen(req)
-                                         
+                
+                if proxy == 'SMARTCACHING': 
+                	f = urllib2.urlopen(req)  #########
+                                     
                 headers = f.info()
                  
-                type = headers.get('Content-Type', '')                              
-#                type = headers['Content-Type']
+                type = headers.get('Content-Type', '')
+                print content_type                              
+				#type = headers['Content-Type']
+
 
                 if (content_type != '') and (type.find(content_type)  == -1):
-                    #unexpected type
-                    if timeout != 0:
-                        socket_setdefaulttimeout(url_open_timeout)            
-                    self.state = -1 #failed
-                    break #do not try again                            
+                	#unexpected type
+                	if timeout != 0:
+                		socket_setdefaulttimeout(timeout)
+                	self.state = -1 #failed
+                	break #do not try again                            
                         
                 #open the destination file
                 self.data = f.read()
                 file = open(localfile, "wb")   
                 file.write(self.data)
                 file.close()
-                f.close()                          
+                #f.close()                          
                        
                 self.localfile = localfile
                 self.state = 0 #success       

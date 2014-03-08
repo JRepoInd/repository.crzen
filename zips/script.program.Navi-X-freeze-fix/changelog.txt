@@ -1,9 +1,11 @@
+[B}Version 0.0.5[B]
+ - Fixed white space errors in Navi-X that became apparent when the server went down
 [B]Version 0.0.4[B]
  - Added Gotham addon.xml change to 2.1.0
- - Rewrote the code a little to accommodate additions better.
+ - Rewrote the code a little to accomodate additons better.
  
 [B]Version 0.0.3[B]
-- Fixed the shutil.copy2 exception issue with android.
+- Fixed the shutil.copy2 exception issue with andriod.
 - Some code cleanup also. 
 
 [B]Version 0.0.2[/B]
