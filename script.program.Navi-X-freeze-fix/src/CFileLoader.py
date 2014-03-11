@@ -55,7 +55,7 @@ class CFileLoader2:
     ######################################################################
     # Description: Downloads a file in case of URL and returns absolute
     #              path to the local file.
-#@todo: Fill parameters    
+    #@todo: Fill parameters    
     # Parameters : URL=source, localfile=destination
     # Return     : -
     ######################################################################
@@ -73,13 +73,13 @@ class CFileLoader2:
             sum_str = ''
             if proxy != "DISABLED":
 
-#                sum = 0
-#                #calculate hash of URL
-#                for i in range(len(URL)):
-#                    sum = sum + (ord(URL[i]) * i)
-#                sum_str = str(sum)
+                #sum = 0
+                ##calculate hash of URL
+                #for i in range(len(URL)):
+                #sum = sum + (ord(URL[i]) * i)
+                #sum_str = str(sum)
 
-#                sum_str=hashlib.md5(URL).hexdigest()
+                #sum_str=hashlib.md5(URL).hexdigest()
                 sum_str=md5.new(URL).hexdigest()
             
             if localfile != '':
@@ -95,7 +95,7 @@ class CFileLoader2:
                 if os.path.exists(destfile) == True:
                     self.localfile = destfile
                     self.state = 0 #success
-#todo: load file in memory if localfile = ''                    
+                #todo: load file in memory if localfile = ''                    
                 else:
                     self.state =  -1 #failed 
             elif (not((proxy == "ENABLED") and (os.path.exists(destfile) == True))):
@@ -127,7 +127,7 @@ class CFileLoader2:
                 self.localfile = RootDir + SEPARATOR + URL
                 self.state = 0 #success
             
-#            Trace(self.localfile)
+            #Trace(self.localfile)
             
             if localfile == '':
                 try:
@@ -157,7 +157,7 @@ class CFileLoader2:
                 creationtime = os.path.getmtime(localfile)
                 currenttime = time.time()
                 deltatime = currenttime - creationtime
-#                Message(str(expires-deltatime))
+                #Message(str(expires-deltatime))
                 
                 if deltatime < expires:
                     self.localfile = localfile
@@ -175,40 +175,43 @@ class CFileLoader2:
                 #rename the existing (expired file)
                 os.rename(localfile, localfile + ".old")
                
+               
         #load the file
         try:
-        	if URL[:3] == 'ftp':
-        		self.loadFTP(URL, localfile, timeout, proxy, content_type, retries)
-        	else:
-        		self.loadHTTP(URL, localfile, timeout, proxy, content_type, retries) 
+            if URL[:3] == 'ftp':
+                self.loadFTP(URL, localfile, timeout, proxy, content_type, retries)
+            else:
+                self.loadHTTP(URL, localfile, timeout, proxy, content_type, retries) 
         except:    #  print to log 
-        	print('url  ',URL)
-        	print('proxy', proxy)
-        	
-		#this will creat a new cached file from the existing file and make it usable
+            print('SMARTCACHE url fail ' + URL)
+            #print('proxy' +  proxy)
+                
+            #this will creat a new cached file from the existing file and make it usable
         if os.path.exists(localfile + ".old") == True:        
-            if os.path.exists(localfile) == False: 	  #see that the new file was not loaded from the server
-				open(localfile, 'a').close() 			 	  #create an empty file
-            if os.path.getsize(localfile) == 0: 			  #check to see if there is any data in the file
-				try:   
-					with open(localfile + ".old",'r') as old_file : # opens the old file with auto close                             
-						for line in old_file : 
-							with open(localfile, 'a+') as new_file:       #open the new file with autoclose
-								new_file.write(line)                          #copies the line in old_file to new_file
-					#xbmc.executebuiltin( "XBMC.Notification(%s,%s,%i)" % ( 'Server Error', 'You are reading cached files', 5000 ) )
-					self.state = 0 #success
-				except :
-					self.state =  -1 #failed
-									
+            if os.path.exists(localfile) == False:      #see that the new file was not loaded from the server
+                open(localfile, 'a').close()                    #create an empty file
+            if os.path.getsize(localfile) == 0:             #check to see if there is any data in the file
+                try:   
+                    with open(localfile + ".old",'r') as old_file : # opens the old file with auto close                             
+                        for line in old_file : 
+                            with open(localfile, 'a+') as new_file:       #open the new file with autoclose
+                                new_file.write(line)                                #copies the line in old_file to new_file
+                    #xbmc.executebuiltin( "XBMC.Notification(%s,%s,%i)" % ( 'Server Error', 'You are reading cached files', 5000 ) )
+                    #dialog = xbmcgui.Dialog()
+                    #dialog.ok("Notice", "Reading old cached pages")
+                    self.state = 0 #success
+                except :
+                    self.state =  -1 #failed
+                                                                        
             #compare the file
             try:
-            	if filecmp.cmp(self.localfile, localfile + ".old") == True:
-                	if expires < (128*3600):
-                		expires = expires * 2
-            	else:
-                	expires = 3600
+                if filecmp.cmp(self.localfile, localfile + ".old") == True:
+                    if expires < (128*3600):
+                        expires = expires * 2
+                else:
+                    expires = 3600
             except :
-            	self.state =  -1 #failed
+                self.state =  -1 #failed
             os.remove(localfile + ".old")
  
         self.metadata["expires"] = str(expires)
@@ -219,7 +222,7 @@ class CFileLoader2:
     ######################################################################
     # Description: Downloads a file in case of URL and returns absolute
     #              path to the local file.
-	#@todo: Fill parameters    
+    #@todo: Fill parameters    
     # Parameters : URL=source, localfile=destination
     # Return     : -
     ######################################################################           
@@ -235,7 +238,6 @@ class CFileLoader2:
             counter = counter + 1 
             try:
                 cookies = ''
-                print('nxserver_URL',nxserver_URL)
                 if URL.find(nxserver_URL) != -1:
                     cookies = 'platform=' + platform + '; version=' + Version +'.'+ SubVersion
                     cookies = cookies + '; nxid=' + nxserver.user_id
@@ -244,69 +246,66 @@ class CFileLoader2:
                 else:
                     values = { 'User-Agent' : 'Mozilla/4.0 (compatible;MSIE 7.0;Windows NT 6.0)'}
                         
-                #print values
-                                 
-                req = urllib2.Request(URL, None, values)
-                #req = urllib2.Request(URL)
-                
-                if proxy == 'SMARTCACHING': 
-                	f = urllib2.urlopen(req)  #########
-                                     
+                #print 'values =    ' + values
+                    print URL
+                #if 'navixtreme' in URL: values = {'jibberish'} ###### used to stop from connecting to navi server
+                req = urllib2.Request(URL, None, values)   
+                f = urllib2.urlopen(req, None, timeout=10)  ######### where it hangs and faults if server is down
+                             
                 headers = f.info()
-                 
+         
                 type = headers.get('Content-Type', '')
-                print content_type                              
-				#type = headers['Content-Type']
-
+                #print content_type                              
+                                #type = headers['Content-Type']
 
                 if (content_type != '') and (type.find(content_type)  == -1):
-                	#unexpected type
-                	if timeout != 0:
-                		socket_setdefaulttimeout(timeout)
-                	self.state = -1 #failed
-                	break #do not try again                            
-                        
+                        #unexpected type
+                        if timeout != 0:
+                                socket_setdefaulttimeout(timeout)
+                        self.state = -1 #failed
+                        break #do not try again                            
+                
                 #open the destination file
                 self.data = f.read()
                 file = open(localfile, "wb")   
                 file.write(self.data)
                 file.close()
                 #f.close()                          
-                       
+               
                 self.localfile = localfile
                 self.state = 0 #success       
                   
             except IOError, e:
                 if hasattr(e, 'reason'):
                     #Message("Failed to reach the server. Reason: %s" %(e.reason))
-                    print 'failed to get URL=' + URL 
+                    print 'Failed to reach the server failed to get URL=' + URL 
                     print 'Reason: ', e.reason
                 elif hasattr(e, 'code'):
                     print 'The server could not fulfill the request.'
                     print 'Error code: ', e.code    
                 self.state = -1 #failed
-
-#           except urllib2.HTTPError:
-#               socket_setdefaulttimeout(oldtimeout)
-#
-#               Trace("There was an http error: ")
-#               self.state = -1 #failed
-
-#           except urllib2.URLError, e:
-#               socket_setdefaulttimeout(oldtimeout)
-#
-#               Trace("There is a problem with the URL: " + str(e.reason))
-#               self.state = -1 #failed
+                #
+                #except urllib2.HTTPError:
+                #   socket_setdefaulttimeout(oldtimeout)
+                #
+                #Trace("There was an http error: ")
+                #   self.state = -1 #failed
+                #
+                #except urllib2.URLError, e:
+                #   socket_setdefaulttimeout(oldtimeout)
+                #
+                #Trace("There is a problem with the URL: " + str(e.reason))
+                #   self.state = -1 #failed
                 
         if timeout != 0:
-            socket_setdefaulttimeout(url_open_timeout)                     
+                socket_setdefaulttimeout(url_open_timeout)                   
     
         #end function
               
     ######################################################################
     # Description: Downloads a file in case of URL and returns absolute
     #              path to the local file.
-#@todo: Fill parameters    
+    #@todo: Fill parameters    
     # Parameters : URL=source, localfile=destination
     # Return     : -
     ######################################################################        

@@ -1,3 +1,6 @@
+[B]Vresion 0.0.6[B]
+ - Fixed more white space errors in the three files and added a 
+ - shorter timeout for the server call in CFileLoader line 253
 [B}Version 0.0.5[B]
  - Fixed white space errors in Navi-X that became apparent when the server went down
 [B]Version 0.0.4[B]

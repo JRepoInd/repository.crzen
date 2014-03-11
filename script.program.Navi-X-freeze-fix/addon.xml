@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="script.program.Navi-X-freeze-fix"
-       version="0.0.5" 
+       version="0.0.6" 
        name="Navi-X freeze fix"
        provider-name="Crzen, With help from HIGHWAY99, Artwork by Marquerite">
   <requires>
